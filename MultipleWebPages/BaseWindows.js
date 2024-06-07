@@ -15,7 +15,6 @@ function createWindow() {
   leftView.setBounds({ x: 0, y: 0, width: 400, height: 600 })
   rightView.setBounds({ x: 400, y: 0, width: 400, height: 600 })
 
-  // Open the DevTools (optional)
   win.webContents.openDevTools();
 }
 

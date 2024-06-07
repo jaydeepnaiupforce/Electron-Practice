@@ -63,7 +63,6 @@ app.on('ready', () => {
 
   const exeName = path.basename(process.execPath);
 
-  // Set the app to open itself at login
   app.setLoginItemSettings({
     openAtLogin: true,
     path: process.execPath,

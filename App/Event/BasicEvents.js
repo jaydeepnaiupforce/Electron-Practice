@@ -57,7 +57,6 @@ app.on("window-all-closed", () => {
 
 app.on('quit', (event, exitCode) => {
   //console.log(`Application is quitting with exit code: ${exitCode}`);
-  // Perform final cleanup tasks here
 });
 
 

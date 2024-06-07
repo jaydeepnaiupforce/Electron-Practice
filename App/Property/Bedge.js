@@ -14,10 +14,8 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
-  // Set badge count to a nonzero value to show the badge
   app.badgeCount = 5;
 
-  // Example to clear the badge count after 10 seconds
   setTimeout(() => {
     app.badgeCount = 0;
   }, 10000);

@@ -13,7 +13,6 @@ function createWindow() {
 app.on('ready', () => {
   createWindow();
 
-  // Set the about panel options
   app.setAboutPanelOptions({
     applicationName: 'My Electron App',
     applicationVersion: '1.0.0',
@@ -22,7 +21,6 @@ app.on('ready', () => {
     iconPath: path.join(__dirname, 'icon.png') // Ensure you have an icon.png file in the root directory
   });
 
-  // Create a menu template to show the about panel
   const menuTemplate = [
     {
       label: 'Help',

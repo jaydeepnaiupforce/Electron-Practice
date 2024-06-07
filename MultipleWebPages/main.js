@@ -13,12 +13,10 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
-  // Add multiple web views
   mainWindow.webContents.on('did-finish-load', () => {
     mainWindow.webContents.send('load-views');
   });
 
-  // Open the DevTools (optional)
   mainWindow.webContents.openDevTools();
 }
 

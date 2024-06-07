@@ -9,9 +9,7 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
-  // Check if the emoji panel is supported
   if (app.isEmojiPanelSupported()) {
-    // Add a menu item to show the emoji panel
     const menu = Menu.getApplicationMenu();
     menu.append(new MenuItem({
       label: 'Emoji Picker',

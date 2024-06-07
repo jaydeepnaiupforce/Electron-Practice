@@ -1,4 +1,4 @@
-const { app, BaseWindow, BrowserView, BrowserWindow } = require('electron')
+const { app, BaseWindow, BrowserWindow } = require('electron')
 
 app.on('ready', () => {
   const parent = new BrowserWindow({
@@ -8,14 +8,14 @@ app.on('ready', () => {
   })
   parent.loadURL('https://github.com')
 
-  const child = new BrowserWindow({
+  const modalChild = new BrowserWindow({
     width: 400,
     height: 300,
-    parent: parent,
-    title: 'Child Window'
+    parent: parent, 
+    modal: true, 
+    title: 'Modal Child Window'
   })
-  child.loadURL('https://github.com')
+  modalChild.loadURL('https://github.com')
 
   parent.show()
-  child.show()
 })

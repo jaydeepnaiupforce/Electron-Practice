@@ -27,7 +27,6 @@ const createWindow = () => {
   
   };
 
-// Event: 'ready'
 app.on('ready', () => {
   console.log('The app is ready.')
   createWindow()
@@ -88,6 +87,5 @@ try {
   }
 ])
 } catch (error) {
-  // Handle errors
   console.error('Error adding tasks:', error);
 }
