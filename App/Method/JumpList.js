@@ -34,33 +34,59 @@ app.on('ready', () => {
 })
 
 try {
-  // Define an array of Task objects
-  const tasks = [
-    {
-      title: 'Open File Explorer', // Title of the task
-      program: 'explorer.exe', // Path of the program to execute (File Explorer)
-      arguments: 'C:\\', // Optional command line arguments (opens File Explorer with C drive)
-      description: 'Open File Explorer to the C drive', // Optional description of the task
-      iconPath: path.join(appDirectory, 'icon.jpg') , // Path to an icon file (using shell32.dll for system icons)
-      iconIndex: 0, // Index of the icon in the icon file
-      workingDirectory: 'C:\\' // Optional working directory for the task
-    },
-    {
-      title: 'Open Notepad', // Title of the task
-      program: 'notepad.exe', // Path of the program to execute (Notepad)
-      // No arguments specified for Notepad
-      description: 'Open Notepad for text editing', // Optional description of the task
-      iconPath: path.join(appDirectory, 'icon.jpg') , // Path to an icon file (using the icon of the Electron application)
-      iconIndex: 0 // Index of the icon in the icon file (using the default icon)
-      // No working directory specified for Notepad
-    }
-  ];
-
-  // Add tasks to the Tasks category of the Jump List
-  const success = app.setUserTasks(tasks);
-
-  // Check if the call succeeded
-  console.log('Tasks added successfully:', success);
+    app.setJumpList([
+  {
+    type: 'custom',
+    name: 'Recent Projects',
+    items: [
+      { type: 'file', path: 'C:\\Projects\\project1.proj' },
+      { type: 'file', path: 'C:\\Projects\\project2.proj' }
+    ]
+  },
+  { // has a name so `type` is assumed to be "custom"
+    name: 'Tools',
+    items: [
+      {
+        type: 'task',
+        title: 'Tool A',
+        program: process.execPath,
+        args: '--run-tool-a',
+        iconPath: process.execPath,
+        iconIndex: 0,
+        description: 'Runs Tool A'
+      },
+      {
+        type: 'task',
+        title: 'Tool B',
+        program: process.execPath,
+        args: '--run-tool-b',
+        iconPath: process.execPath,
+        iconIndex: 0,
+        description: 'Runs Tool B'
+      }
+    ]
+  },
+  { type: 'frequent' },
+  { // has no name and no type so `type` is assumed to be "tasks"
+    items: [
+      {
+        type: 'task',
+        title: 'New Project',
+        program: process.execPath,
+        args: '--new-project',
+        description: 'Create a new project.'
+      },
+      { type: 'separator' },
+      {
+        type: 'task',
+        title: 'Recover Project',
+        program: process.execPath,
+        args: '--recover-project',
+        description: 'Recover Project'
+      }
+    ]
+  }
+])
 } catch (error) {
   // Handle errors
   console.error('Error adding tasks:', error);
