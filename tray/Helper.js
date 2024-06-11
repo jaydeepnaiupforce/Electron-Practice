@@ -1,4 +1,4 @@
-const { nativeImage, Tray, BrowserWindow, Menu, shell } = require("electron");
+const { nativeImage, Tray, BrowserWindow, Menu, shell, screen, ipcMain } = require("electron");
 
 class WindowManger {
   constructor() {
@@ -16,17 +16,17 @@ class WindowManger {
     this.tray.on("click", this.toggleWindow.bind(this));
     this.tray.setToolTip("this is example");
 
-    setTimeout(() => {
-      this.tray.setImage("./icon.png");
-      this.tray.displayBalloon({
-        iconType: "info",
-        title: "Notification Title",
-        content: "This is a notification message.",
-        largeIcon: true,
-        noSound: false,
-        respectQuietTime: false,
-      });
-    }, 5000);
+    // setTimeout(() => {
+    //   this.tray.setImage("./icon.png");
+    //   this.tray.displayBalloon({
+    //     iconType: "info",
+    //     title: "Notification Title",
+    //     content: "This is a notification message.",
+    //     largeIcon: true,
+    //     noSound: false,
+    //     respectQuietTime: false,
+    //   });
+    // }, 5000);
 
     const contextMenu = Menu.buildFromTemplate([
       {
@@ -66,34 +66,39 @@ class WindowManger {
     ]);
 
     this.tray.setContextMenu(contextMenu);
-
-    // Allow dropping files onto the tray icon
-    this.tray.on("drop", (event) => {
-      event.preventDefault();
-      console.log("Files dropped:", event.files);
+    // this.tray.show()
+    ipcMain.on('getTrayCoordinates', (event) => {
+      const trayBounds = this.tray.getBounds();
+      event.reply('trayCoordinates', trayBounds);
     });
 
-    this.tray.on("drop-files", (event, files) => {
-      event.preventDefault();
-      console.log("Files dropped:", files);
-    });
   }
 
   createWindow() {
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
     this.win = new BrowserWindow({
-      width: 250,
-      height: 435,
+      width,
+      height,
       frame: false,
       show: false,
       fullscreenable: false,
+      fullscreen:true,
       movable: false,
       resizable: false,
+      transparent: true,
+      alwaysOnTop: true,
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
         plugins: true,
       },
       skipTaskbar: true,
+    });
+
+
+    this.win.on('blur', () => {
+      this.win.hide();
     });
 
     this.win.loadFile("./index.html");
@@ -107,52 +112,79 @@ class WindowManger {
 
   }
 
+  // getWindowPosition() {
+  //   const windowBounds = this.win.getBounds();
+  //   const trayBounds = this.tray.getBounds();
+
+  //   let x = 0;
+  //   let y = 0;
+
+  //   if (process.platform != "win32") {
+  //     // Center window horizontally below the tray icon
+  //     x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2))
+  //     // Position window 4 pixels vertically below the tray icon
+  //     y = Math.round(trayBounds.y + trayBounds.height)
+
+  //     return {
+  //       x: x,
+  //       y: y
+  //     }
+  //   }
+  //   //On Windows the Task bar is sadly very flexible
+  //   else {
+  //     if (trayBounds.y < 250) {
+  //       x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2))
+  //       y = Math.round(trayBounds.y + trayBounds.height + 4)
+  //     } else if (trayBounds.x < 250) {
+  //       x = Math.round(trayBounds.x + trayBounds.height * 2);
+  //       y = Math.round(trayBounds.y - windowBounds.height + trayBounds.height)
+  //     } else if (trayBounds.height >= 40) {
+  //       x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2))
+  //       y = Math.round(trayBounds.y - windowBounds.height+40)
+  //     } else {
+  //       x = Math.round(trayBounds.x - windowBounds.width);
+  //       y = Math.round(trayBounds.y - windowBounds.height + trayBounds.height)
+  //     }
+  //     return {
+  //       x: x,
+  //       y: y
+  //     }
+  //   }
+  // }
+
   getWindowPosition() {
     const windowBounds = this.win.getBounds();
     const trayBounds = this.tray.getBounds();
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
     let x = 0;
     let y = 0;
 
-    //MacOS
     if (process.platform != "win32") {
       // Center window horizontally below the tray icon
-      x = Math.round(
-        trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2
-      );
-      // Position window 4 pixels vertically below the tray icon
-      y = Math.round(trayBounds.y + trayBounds.height);
+      x = Math.round((width - windowBounds.width) / 2);
+      // Position window vertically above the tray icon
+      y = Math.round(height - windowBounds.height);
 
       return {
         x: x,
-        y: y,
+        y: y
       };
     }
-    //On Windows the Task bar is sadly very flexible
+    // On Windows, position the window to the right bottom of the screen
     else {
-      if (trayBounds.y < 250) {
-        x = Math.round(
-          trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2
-        );
-        y = Math.round(trayBounds.y + trayBounds.height + 4);
-      } else if (trayBounds.x < 250) {
-        x = Math.round(trayBounds.x + trayBounds.height * 2);
-        y = Math.round(trayBounds.y - windowBounds.height + trayBounds.height);
-      } else if (trayBounds.height >= 40) {
-        x = Math.round(
-          trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2
-        );
-        y = Math.round(trayBounds.y - windowBounds.height);
-      } else {
-        x = Math.round(trayBounds.x - windowBounds.width);
-        y = Math.round(trayBounds.y - windowBounds.height + trayBounds.height);
-      }
+      x = Math.round(width - windowBounds.width);
+      y = Math.round(height - windowBounds.height+35);
+
       return {
         x: x,
-        y: y,
+        y: y
       };
     }
   }
+
+
+  
 
   showMainWindow() {
     const position = this.getWindowPosition();

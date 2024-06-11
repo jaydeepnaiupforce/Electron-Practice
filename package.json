@@ -32,6 +32,8 @@
   },
   "dependencies": {
     "body-parser": "^1.20.2",
+    "electron-drag-drop": "^1.1.0",
+    "electron-tray-window": "^1.2.7",
     "express": "^4.19.2",
     "expresss": "^0.0.0"
   }
