@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tray Coordinates</title>
+    <style>
+      #icon {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        background-color: red; /* Just for visibility, you can change it */
+        cursor: grab;
+        transition: left 0.3s, top 0.3s; /* Add transition property here */
+      }
+      body {
+        height: 100vh; /* Adjusted to 100vh */
+      margin: 0;
+      overflow: hidden; /* Hide overflow to prevent scroll bar */
+      }
+      #line {
+        position: absolute;
+        width: 0;
+        height: 2px;
+        background-color: blue; /* Arrow line color */
+        transform-origin: 0 0;
+        transition: width 0.3s; /* Add transition property here */
+      }
+      #selectorContainer {
+        display: flex;
+        justify-content: center;
+        align-items: end;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="selectorContainer">
+      <div id="icon"></div>
+      <div id="line"></div>
+    </div>
+
+    <script>
+      const { ipcRenderer } = require("electron");
+
+      document.addEventListener("click", (event) => {
+        const isIconClicked = event.target.id !== "icon";
+        if (isIconClicked) {
+          ipcRenderer.send("hideWindow");
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        ipcRenderer.send("getTrayCoordinates");
+
+        ipcRenderer.on("trayCoordinates", (event, trayBounds) => {
+          const icon = document.getElementById("icon");
+          icon.style.left = `${trayBounds.x}px`;
+          icon.style.top = `${trayBounds.y - 30}px`; // Adjusting top position for better alignment
+
+          // Update initialPosition to use tray coordinates
+          initialPosition.x = trayBounds.x;
+          initialPosition.y = trayBounds.y - 30;
+        });
+
+        const icon = document.getElementById("icon");
+        const line = document.getElementById("line");
+
+        // Define initialPosition with default values
+        let initialPosition = {
+          x: window.innerWidth / 2 - icon.offsetWidth / 2,
+          y: window.innerHeight - icon.offsetHeight,
+        };
+
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+
+        icon.addEventListener("mousedown", (event) => {
+          isDragging = true;
+          startX = event.clientX;
+          startY = event.clientY;
+          initialX = icon.offsetLeft;
+          initialY = icon.offsetTop;
+          icon.style.cursor = "grabbing";
+
+          // Set initial position of the line
+          line.style.left = `${initialX + 16}px`; // Adjust for the center of the icon
+          line.style.top = `${initialY + 16}px`;
+
+          // Remove transition effect while dragging
+          icon.style.transition = "none";
+          line.style.transition = "none";
+        });
+
+        document.addEventListener("mousemove", (event) => {
+          if (isDragging) {
+            const x = initialX + event.clientX - startX;
+            const y = initialY + event.clientY - startY;
+            icon.style.left = `${x}px`;
+            icon.style.top = `${y}px`;
+
+            const deltaX = x + 16 - (initialX + 16);
+            const deltaY = y + 16 - (initialY + 16);
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+
+            line.style.width = `${distance}px`;
+            line.style.transform = `rotate(${angle}deg)`;
+          }
+        });
+
+        document.addEventListener("mouseup", () => {
+          if (isDragging) {
+            isDragging = false;
+            icon.style.cursor = "grab";
+
+            // Restore transition effect when dragging stops
+            icon.style.transition = "";
+            line.style.transition = "";
+
+            // Send a message to retrieve tray coordinates
+            ipcRenderer.send("getTrayCoordinates");
+
+            // Reset icon's position to initial position
+            icon.style.left = `${initialPosition.x}px`;
+            icon.style.top = `${initialPosition.y}px`;
+
+            // Reset line's width to 0 and position to initial position
+            line.style.width = "0px";
+            line.style.left = `${initialPosition.x + 16}px`; // Adjust for the center of the icon
+            line.style.top = `${initialPosition.y + 16}px`;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
