@@ -1,32 +1,29 @@
-const { app, ipcMain, BrowserWindow } = require("electron");
-const { dialog } = require('electron');
-const { AbortController } = require('abort-controller');
-const controller = new AbortController();
-const signal = controller.signal;
+const { app, ipcMain } = require("electron");
+const WindowManager = require("./trayDrag/Helper");
 
-
-var win ; 
+win = new WindowManager();
 
 app.on("ready",()=>{
-  win = new BrowserWindow({
-    width: 250,
-    height: 435,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      plugins: true,
-    },
-  });
+  win.createUI(win)
+})
 
-  win.loadFile("./index.html");
 
-     dialog.showMessageBox({
-      type: 'info',
-      title: 'Information',
-      message: 'This is an informational message.',
-      buttons: ['Yes', 'No'],
-      defaultId:2,
-      signal: signal // Pass the signal to the message box
-    })
-    
+ipcMain.on("create-tray",()=>{
+  win.createTray(win)
+})
+
+ipcMain.on("remove-tray",()=>{
+  win.tray.destroy()
+})
+
+
+
+ipcMain.on('getTrayCoordinates', (event) => {
+  const trayBounds = win.getWindowPosition();
+  event.reply('trayCoordinates', trayBounds);
+});
+
+
+ipcMain.on("hideWindow",()=>{
+  win.win.hide()
 })

@@ -9,22 +9,23 @@
         position: absolute;
         width: 32px;
         height: 32px;
-        background-color: red; /* Just for visibility, you can change it */
+        border-radius: 50%;
+        background-color: red; 
         cursor: grab;
-        transition: left 0.3s, top 0.3s; /* Add transition property here */
+        transition: left 0.3s, top 0.3s; 
       }
       body {
-        height: 100vh; /* Adjusted to 100vh */
-      margin: 0;
-      overflow: hidden; /* Hide overflow to prevent scroll bar */
+        height: 100vh;
+        margin: 0;
+        overflow: hidden; 
       }
       #line {
         position: absolute;
         width: 0;
         height: 2px;
-        background-color: blue; /* Arrow line color */
+        background-color: blue; 
         transform-origin: 0 0;
-        transition: width 0.3s; /* Add transition property here */
+        transition: width 0.3s; 
       }
       #selectorContainer {
         display: flex;
@@ -36,7 +37,9 @@
   </head>
   <body>
     <div id="selectorContainer">
-      <div id="icon"></div>
+      <div id="icon">
+        <!-- <img src="./ic"/> -->
+      </div>
       <div id="line"></div>
     </div>
 
@@ -51,16 +54,18 @@
       });
 
       document.addEventListener("DOMContentLoaded", () => {
-        ipcRenderer.send("getTrayCoordinates");
+        setTimeout(() => {
+          ipcRenderer.send("getTrayCoordinates");
+        }, 100);
 
         ipcRenderer.on("trayCoordinates", (event, trayBounds) => {
           const icon = document.getElementById("icon");
           icon.style.left = `${trayBounds.x}px`;
-          icon.style.top = `${trayBounds.y - 30}px`; // Adjusting top position for better alignment
+          icon.style.top = `${trayBounds.y}px`; // Adjusting top position for better alignment
 
           // Update initialPosition to use tray coordinates
           initialPosition.x = trayBounds.x;
-          initialPosition.y = trayBounds.y - 30;
+          initialPosition.y = trayBounds.y;
         });
 
         const icon = document.getElementById("icon");
